@@ -1,0 +1,2 @@
+# Не редагуйте provider після застосування міграцій.
+provider = "postgresql"

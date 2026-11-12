@@ -1,0 +1,83 @@
+name: Weblabs checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lab: [2, 3]
+    defaults:
+      run:
+        working-directory: lab ${{ matrix.lab }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run check
+
+  frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lab: [4, 5, 6]
+    defaults:
+      run:
+        working-directory: lab ${{ matrix.lab }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci && npm run db:generate
+        working-directory: lab 3
+      - run: npm ci && npx playwright install --with-deps chromium
+        working-directory: lab 6
+      - run: npm run test:e2e
+        working-directory: lab 6
+        env:
+          LAB_PRODUCTION: '1'
+
+  deploy:
+    needs: [backend, frontend, browser]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Deploy verified frontend
+        if: env.VERCEL_TOKEN != '' && env.VERCEL_ORG_ID != '' && env.VERCEL_PROJECT_ID != ''
+        working-directory: lab 6
+        run: |
+          npx --yes vercel@65.14.0 pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx --yes vercel@65.14.0 build --prod --token="$VERCEL_TOKEN"
+          npx --yes vercel@65.14.0 deploy --prebuilt --prod --token="$VERCEL_TOKEN"

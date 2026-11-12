@@ -1,0 +1,50 @@
+{
+  "checks": [
+    {
+      "method": "GET",
+      "url": "/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/projects",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "url": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/projects",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/projects/21a5e56c-b3cc-4cdc-8f99-bf203cef7d21/members",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/tasks",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "url": "/api/notifications",
+      "status": 200
+    }
+  ],
+  "event": {
+    "event": "notification",
+    "title": "Завдання",
+    "priority": "HIGH",
+    "message": "Запис додано."
+  }
+}

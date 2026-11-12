@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectRole {
+  MEMBER
+  MANAGER
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String          @db.VarChar(100)
+  email       String          @unique @db.VarChar(254)
+  passwordHash String?
+  role         Role           @default(USER)
+  refreshTokens RefreshToken[]
+  notifications Notification[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  projects    Project[]       @relation("ProjectOwner")
+  memberships ProjectMember[]
+  tasks       Task[]          @relation("TaskAssignee")
+  comments    Comment[]
+  attachments Attachment[]
+}
+
+model RefreshToken {
+  id        String    @id @db.Uuid
+  tokenHash String    @unique
+  userId    String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Project {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String          @db.VarChar(150)
+  description String?         @db.VarChar(2000)
+  ownerId     String          @db.Uuid
+  owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  members     ProjectMember[]
+  tasks       Task[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([ownerId])
+}
+
+model ProjectMember {
+  projectId String      @db.Uuid
+  userId    String      @db.Uuid
+  role      ProjectRole @default(MEMBER)
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@id([projectId, userId])
+  @@index([userId])
+}
+
+model Task {
+  id          String       @id @default(uuid()) @db.Uuid
+  title       String       @db.VarChar(200)
+  description String?      @db.VarChar(5000)
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  position    Int          @default(0)
+  projectId   String       @db.Uuid
+  assigneeId  String?      @db.Uuid
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  comments    Comment[]
+  attachments Attachment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([projectId, status])
+  @@index([projectId, position, id])
+  @@index([projectId, createdAt, id])
+  @@index([assigneeId])
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  type      String    @db.VarChar(32)
+  priority  String    @db.VarChar(16)
+  title     String    @db.VarChar(150)
+  message   String    @db.VarChar(500)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt, id])
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  body      String   @db.VarChar(3000)
+  taskId    String   @db.Uuid
+  authorId  String   @db.Uuid
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([authorId])
+}
+
+model Attachment {
+  id           String   @id @default(uuid()) @db.Uuid
+  fileName     String   @db.VarChar(255)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  url          String   @db.VarChar(2048)
+  content      Bytes?
+  taskId       String   @db.Uuid
+  uploadedById String   @db.Uuid
+  task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([uploadedById])
+}

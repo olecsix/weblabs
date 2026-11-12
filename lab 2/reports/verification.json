@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "method": "GET",
+      "url": "/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/projects",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "url": "/api/auth/register",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/projects",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/tasks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "url": "/api/files",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "url": "/api/tasks?q=вкладення&limit=1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/users",
+      "status": 403
+    }
+  ]
+}

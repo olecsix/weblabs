@@ -1,0 +1,50 @@
+{
+  "dataset": {
+    "projects": 200,
+    "tasks": 20000,
+    "tasksPerProject": 100
+  },
+  "query": "20 latest tasks for one project",
+  "before": {
+    "executionMs": 0.088,
+    "plan": [
+      {
+        "node": "Limit",
+        "rows": 20,
+        "sharedHits": 102
+      },
+      {
+        "node": "Sort",
+        "rows": 20,
+        "sharedHits": 102
+      },
+      {
+        "node": "Bitmap Heap Scan",
+        "rows": 100,
+        "sharedHits": 102
+      },
+      {
+        "node": "Bitmap Index Scan",
+        "index": "Task_projectId_status_idx",
+        "rows": 100,
+        "sharedHits": 2
+      }
+    ]
+  },
+  "after": {
+    "executionMs": 0.029,
+    "plan": [
+      {
+        "node": "Limit",
+        "rows": 20,
+        "sharedHits": 22
+      },
+      {
+        "node": "Index Scan",
+        "index": "Task_projectId_createdAt_id_idx",
+        "rows": 20,
+        "sharedHits": 22
+      }
+    ]
+  }
+}
