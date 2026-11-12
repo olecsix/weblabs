@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="uk"><meta charset="utf-8"><title>Task Manager — результати API</title><style>
+  *{box-sizing:border-box}body{margin:0;background:#f1f5f9;color:#172033;font:16px 'Segoe UI',sans-serif}main{max-width:1100px;margin:auto;padding:38px 30px}header{background:#112c42;color:#fff;border-radius:16px;padding:28px 32px;margin-bottom:24px}h1{font-size:30px;margin:8px 0 14px}header p{color:#c5d7e5;margin:7px 0;line-height:1.6}.eyebrow{letter-spacing:2px;text-transform:uppercase;font-size:12px;color:#7ee2c5}h2{font-size:24px;margin:0 0 20px}.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.badges span{background:#244358;padding:9px 14px;border-radius:8px}section{margin-bottom:30px}article{background:#fff;border:1px solid #dce4ed;border-radius:12px;overflow:hidden;margin-bottom:18px;break-inside:avoid}.request{display:flex;gap:16px;align-items:center;background:#e9f1f7;padding:16px 20px;word-break:break-all}.request b{color:#006b65;width:66px;flex-shrink:0}.request span{flex:1;font:14px Consolas,monospace}.request strong{background:#d8f5e6;color:#056345;padding:6px 12px;border-radius:6px}.request strong.s400,.request strong.s409{background:#fff0ce;color:#925b00}.label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:15px 20px 5px}pre{font:14px/1.5 Consolas,monospace;white-space:pre-wrap;word-break:break-word;margin:0;padding:4px 20px 20px}.note{color:#52657a;line-height:1.6;font-size:14px}</style><main>
+  <header><div class="eyebrow">Лабораторна робота 1 / фактичне тестування</div><h1>Task Manager · REST API</h1><p>Express + Prisma + PostgreSQL · ізольована тестова база</p><p>15 інтеграційних сценаріїв пройдено. Нижче — реальні запити й відповіді з verification.json.</p><div class="badges"><span>86 записаних HTTP-запитів</span><span>200: 24</span><span>201: 13</span><span>204: 9</span><span>400: 14</span><span>404: 22</span><span>409: 4</span></div></header>
+  <section id="crud"><h2>Створення, оновлення та видалення</h2><article><div class="request"><b>POST</b><span>/api/tasks</span><strong class="s201">201</strong></div><div class="label">Тіло запиту</div><pre>{
+  "title": "Створити API",
+  "projectId": "721596c6-94ed-4acd-b757-14fe2cddacf2",
+  "assigneeId": "b043ca2e-7a76-4697-b726-ab3ef9fa9076"
+}</pre><div class="label">Фактична відповідь</div><pre>{
+  "data": {
+    "id": "4250ec87-0f83-4c23-9669-495656c1a204",
+    "title": "Створити API",
+    "description": null,
+    "status": "TODO",
+    "priority": "MEDIUM",
+    "dueDate": null,
+    "projectId": "721596c6-94ed-4acd-b757-14fe2cddacf2",
+    "assigneeId": "b043ca2e-7a76-4697-b726-ab3ef9fa9076",
+    "createdAt": "2026-11-02T01:15:14.999Z",
+    "updatedAt": "2026-11-02T01:15:14.999Z"
+  }
+}</pre></article><article><div class="request"><b>PATCH</b><span>/api/tasks/4250ec87-0f83-4c23-9669-495656c1a204</span><strong class="s200">200</strong></div><div class="label">Тіло запиту</div><pre>{
+  "status": "IN_PROGRESS",
+  "priority": "HIGH",
+  "dueDate": "2026-11-10T12:00:00+02:00"
+}</pre><div class="label">Фактична відповідь</div><pre>{
+  "data": {
+    "id": "4250ec87-0f83-4c23-9669-495656c1a204",
+    "title": "Створити API",
+    "description": null,
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "dueDate": "2026-11-10T10:00:00.000Z",
+    "projectId": "721596c6-94ed-4acd-b757-14fe2cddacf2",
+    "assigneeId": "b043ca2e-7a76-4697-b726-ab3ef9fa9076",
+    "createdAt": "2026-11-02T01:15:14.999Z",
+    "updatedAt": "2026-11-02T01:15:15.085Z"
+  }
+}</pre></article><article><div class="request"><b>DELETE</b><span>/api/tasks/4250ec87-0f83-4c23-9669-495656c1a204</span><strong class="s204">204</strong></div><div class="label">Фактична відповідь</div><pre>(порожнє тіло)</pre></article></section>
+  <section id="errors"><h2>Валідація та конфлікт унікальності</h2><article><div class="request"><b>PATCH</b><span>/api/tasks/4250ec87-0f83-4c23-9669-495656c1a204</span><strong class="s400">400</strong></div><div class="label">Тіло запиту</div><pre>{
+  "status": "INVALID"
+}</pre><div class="label">Фактична відповідь</div><pre>{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Перевірте вхідні дані",
+    "details": [
+      {
+        "path": "status",
+        "message": "Invalid option: expected one of \"TODO\"|\"IN_PROGRESS\"|\"DONE\""
+      }
+    ],
+    "requestId": "c97b7470-3507-4600-b308-4508e7901341"
+  }
+}</pre></article><article><div class="request"><b>POST</b><span>/api/users</span><strong class="s409">409</strong></div><div class="label">Тіло запиту</div><pre>{
+  "name": "Дублікат",
+  "email": "olena@example.com"
+}</pre><div class="label">Фактична відповідь</div><pre>{
+  "error": {
+    "code": "CONFLICT",
+    "message": "Запис з таким унікальним значенням уже існує",
+    "requestId": "0aaa5db6-9e40-4530-916e-daa29499f4cb"
+  }
+}</pre></article><p class="note">400 та 409 тут є очікуваними результатами негативних перевірок. Усі приклади отримані від API з реальною PostgreSQL. Це перегляд протоколу тестів, не інтерфейс Postman.</p></section>
+  <footer class="note">Час джерела: 2026-11-02T01:15:15.951Z · Повний протокол: verification.json</footer></main></html>

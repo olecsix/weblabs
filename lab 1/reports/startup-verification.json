@@ -1,0 +1,10 @@
+{
+  "command": "node src/server.js",
+  "health": {
+    "status": "ok",
+    "database": "connected"
+  },
+  "swaggerOperations": 31,
+  "browserErrors": [],
+  "note": "Перевірено на окремому порту з тимчасовою PostgreSQL; робоча конфігурація — порт 3000."
+}

@@ -1,0 +1,90 @@
+@baseUrl = http://127.0.0.1:3000
+
+### Перевірити базу
+GET {{baseUrl}}/health
+
+### 1. Створити користувача (для повтору змініть email або завершіть видалення)
+# @name createUser
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{"name":"Марія","email":"demo.lab1@example.com"}
+
+### 2. Отримати користувача
+GET {{baseUrl}}/api/users/{{createUser.response.body.$.data.id}}
+
+### 3. Список користувачів
+GET {{baseUrl}}/api/users?page=1&limit=10
+
+### 4. Створити проєкт
+# @name createProject
+POST {{baseUrl}}/api/projects
+Content-Type: application/json
+
+{"name":"Лабораторна робота 1","ownerId":"{{createUser.response.body.$.data.id}}"}
+
+### 5. Додати учасника
+POST {{baseUrl}}/api/projects/{{createProject.response.body.$.data.id}}/members
+Content-Type: application/json
+
+{"userId":"{{createUser.response.body.$.data.id}}","role":"MANAGER"}
+
+### 6. Створити завдання
+# @name createTask
+POST {{baseUrl}}/api/tasks
+Content-Type: application/json
+
+{"title":"Перевірити REST API","projectId":"{{createProject.response.body.$.data.id}}","assigneeId":"{{createUser.response.body.$.data.id}}","priority":"HIGH"}
+
+### 7. Відфільтрувати завдання
+GET {{baseUrl}}/api/tasks?projectId={{createProject.response.body.$.data.id}}&status=TODO
+
+### 8. Оновити завдання
+PATCH {{baseUrl}}/api/tasks/{{createTask.response.body.$.data.id}}
+Content-Type: application/json
+
+{"status":"DONE","dueDate":"2026-11-10T12:00:00+02:00"}
+
+### 9. Створити коментар
+# @name createComment
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+
+{"body":"Перевірку завершено","taskId":"{{createTask.response.body.$.data.id}}","authorId":"{{createUser.response.body.$.data.id}}"}
+
+### 10. Створити метадані вкладення (не завантаження файлу)
+# @name createAttachment
+POST {{baseUrl}}/api/attachments
+Content-Type: application/json
+
+{"fileName":"report.txt","mimeType":"text/plain","size":128,"url":"https://example.com/report.txt","taskId":"{{createTask.response.body.$.data.id}}","uploadedById":"{{createUser.response.body.$.data.id}}"}
+
+### 11. Помилка валідації: очікується 400
+PATCH {{baseUrl}}/api/tasks/{{createTask.response.body.$.data.id}}
+Content-Type: application/json
+
+{"status":"INVALID"}
+
+### 12. Дублікат email: очікується 409
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{"name":"Дублікат","email":"demo.lab1@example.com"}
+
+### 13. Видалити метадані вкладення
+DELETE {{baseUrl}}/api/attachments/{{createAttachment.response.body.$.data.id}}
+
+### 14. Видалити коментар
+DELETE {{baseUrl}}/api/comments/{{createComment.response.body.$.data.id}}
+
+### 15. Видалити завдання
+DELETE {{baseUrl}}/api/tasks/{{createTask.response.body.$.data.id}}
+
+### 16. Видалити учасника
+DELETE {{baseUrl}}/api/projects/{{createProject.response.body.$.data.id}}/members/{{createUser.response.body.$.data.id}}
+
+### 17. Видалити проєкт
+DELETE {{baseUrl}}/api/projects/{{createProject.response.body.$.data.id}}
+
+### 18. Видалити користувача
+DELETE {{baseUrl}}/api/users/{{createUser.response.body.$.data.id}}
